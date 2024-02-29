@@ -197,6 +197,7 @@ ECRリポジトリ作成時に確認したコマンドを利用してECRへの�
 
 ```
 $ aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com
+
 Login Succeeded
 ```
 
@@ -353,3 +354,82 @@ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi
 ```
 
 ※スクショの掲載は省略するがマネージメントコンソールでイメージが登録されていることを確認しておく。
+
+## <font color="red">トラブルシューティング</font> (2024/02/29)
+
+以降の作業(15:ECSサービスのデプロイ)でイメージが正しく作られていないことが原因と思われるエラーが発生した。この問題を解決するために以下の作業を行った。
+
+### 原因
+
+イメージの生成に使用したPCがM1 Macであるため、デフォルトでArm64向けのイメージが作成されたため、ECSコンテナはX86_64イメージを前提としているためコンテナを正しく起動できないことが原因と思われる。
+
+### イメージのプラットフォームを確認する
+
+確かにarm64向けにビルドされていることを確認した
+
+```
+$ docker inspect ecs-sample-webapp | grep Archi
+        "Architecture": "arm64",
+```
+
+### イメージを再作成〜ECRへの再PUSH
+
+- ecs-sample-webapp
+
+```
+$ cd sample-webapp
+$ docker build --platform linux/amd64 -t ecs-sample-webapp .
+
+# tag latest
+$ docker tag ecs-sample-webapp:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-webapp:latest
+
+# tag 1.0.1
+$ docker tag 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-webapp:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-webapp:1.0.1
+
+# push latest
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-webapp:latest
+
+# push 1.0.1
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-webapp:1.0.1
+```
+
+- ecs-sample-backend
+
+```
+$ cd sample-backend
+$ docker build --platform linux/amd64 -t ecs-sample-backend .
+
+# tag latest
+$ docker tag ecs-sample-backend:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-backend:latest
+
+# tag 1.0.1
+$ docker tag 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-backend:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-backend:1.0.1
+
+# push latest
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-backend:latest
+
+# push 1.0.1
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-backend:1.0.1
+```
+
+- ecs-sample-restapi
+
+```
+$ cd sample-restapi
+$ docker build --platform linux/amd64 -t ecs-sample-restapi .
+
+# tag latest
+$ docker tag ecs-sample-restapi:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi:latest
+
+# tag 1.0.1
+$ docker tag 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi:latest 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi:1.0.1
+
+# push latest
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi:latest
+
+# push 1.0.1
+$ docker push 155743614390.dkr.ecr.ap-northeast-1.amazonaws.com/ecs-sample-restapi:1.0.1
+```
+
+<font color="red">※バージョンを1.0.1に上げている点に注意</font>
+
