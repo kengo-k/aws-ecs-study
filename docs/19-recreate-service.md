@@ -92,7 +92,7 @@ $ aws servicediscovery create-service \
 ```
 aws ecs create-service \
   --cluster ecs-lesson-cluster \
-  --service-name ecs-sample-webapp \
+  --service-name sample-webapp \
   --task-definition sample-webapp-task \
   --load-balancers '[{"targetGroupArn": "[frontend用のTargetGroupArn]", "containerName": "sample-webapp",  "containerPort": 8080 },{ "targetGroupArn": "[backend用のTargetGroupArn]", "containerName": "sample-backend", "containerPort":8070 }]' \
   --desired-count 2 \
@@ -102,12 +102,14 @@ aws ecs create-service \
   --service-registries '[{"registryArn":"[レジストリーARN]"}]'
 ```
 
+上記の`[レジストリーARN]`には一つ目のコマンドの実行結果に含まれるARNを指定する
+
 ### 実行結果
 
 ```
 aws ecs create-service \
   --cluster ecs-lesson-cluster \
-  --service-name ecs-sample-webapp \
+  --service-name sample-webapp \
   --task-definition sample-webapp-task \
   --load-balancers '[{"targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:155743614390:targetgroup/ecs-sample-webapp/be573b2ef494e020", "containerName": "sample-webapp",  "containerPort": 8080 },{ "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:155743614390:targetgroup/ecs-sample-webapp-8070/388979a85b959424", "containerName": "sample-backend", "containerPort":8070 }]' \
   --desired-count 2 \
@@ -133,3 +135,10 @@ $ aws ecs list-services --cluster ecs-lesson-cluster
 ## マネージメントコンソールからも確認する
 
 ![](images/19/07.png)
+
+
+---
+
+### MEMO
+
+マネージメントコンソールの新しいUIではサービスディスカバリーを作成できないためCLIを使わざるを得ないという事情がある模様。
