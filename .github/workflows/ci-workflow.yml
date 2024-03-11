@@ -17,7 +17,7 @@ jobs:
 
     - name: Unit Test
       run: cd ${{ github.workspace }}
-      run: cd sample-webapp && npm install && npm run test:unit
+    - run: cd sample-webapp && npm install && npm run test:unit
 
     - name: Suucess
       uses: rtCamp/action-slack-notify@v2.0.2
