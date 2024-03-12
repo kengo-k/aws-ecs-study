@@ -1,10 +1,11 @@
 name: Deploy work flow for Amazon ECS
 
 on:
-  pull_request:
-    branches:
-      - main
-    types: [closed]
+  # pull_request:
+  #   branches:
+  #     - main
+  #   types: [closed]
+  on: [push]
 
 env:
   AWS_REGION: ap-northeast-1
@@ -45,6 +46,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
+        echo "ECR: $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG"
         cd sample-webapp
         docker build -t $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG .
         docker tag $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:latest
