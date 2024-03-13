@@ -46,8 +46,10 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       run: |
-        echo "ECR: $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG"
         cd sample-webapp
+        echo "----- create image start -----"
+        docker build -t ecs-sample-webapp .
+        echo "----- create image start2 -----"
         docker build -t $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG .
         docker tag $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:latest
         docker push $ECR_REGISTRY/$WEBAPP_CONTAINER_NAME:$WEBAPP_TAG
